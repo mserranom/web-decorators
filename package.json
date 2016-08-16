@@ -1,5 +1,5 @@
 {
-  "name": "express-annotations",
+  "name": "web-decorators",
   "version": "0.1.0-latest",
   "description": "lightweight annotation-based dependency injection container for typescript",
   "engines": {

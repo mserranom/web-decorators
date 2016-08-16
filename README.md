@@ -1,6 +1,7 @@
 # web-decorators
 Typescript and ES2016 Decorators for Web Framework Configuration.
 
+[![Build Status](https://travis-ci.org/mserranom/web-decorators.svg?branch=master)](https://travis-ci.org/mserranom/web-decorators) [![npm version](https://badge.fury.io/js/web-decorators.svg)](https://badge.fury.io/js/web-decorators)
 
 ## Features
  * Express Route wiring using Decorators
