@@ -9,10 +9,11 @@ Typescript and ES2016 Decorators for Web Framework Configuration.
 ## API
 ```typescript
 
+import {Route, Middleware, GET, POST} from '../src/express_decorators';
+
 function messageNotNull(req, res) {
-    let body = req.body;
     if(!req.body.message) {
-        res.status(414).send('a message is required');
+        res.status(400).send('a message is required');
     }
     next();
 
