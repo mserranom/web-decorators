@@ -1,0 +1,53 @@
+{
+  "name": "express-annotations",
+  "version": "0.1.0-latest",
+  "description": "lightweight annotation-based dependency injection container for typescript",
+  "engines": {
+    "node": "~5.5.0",
+    "npm": "~3.5.3"
+  },
+  "dependencies": {
+    "@types/express": "4.0.30",
+    "@types/node": "~4.0.30"
+  },
+  "peerDependencies": {
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "2.2.28",
+    "chai": "3.5.0",
+    "chai-as-promised": "5.3.0",
+    "chai-things": "0.2.0",
+    "mocha": "2.5.3",
+    "request": "2.74.0",
+    "request-promise": "4.1.1",
+    "ts-node": "1.2.2",
+    "typescript": "beta",
+    "body-parser": "1.15.2",
+    "express": "4.14.0"
+  },
+  "scripts": {
+    "test": "mocha --harmony --require ts-node/register ./test/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/mserranom/container-ts.git"
+  },
+  "keywords": [
+    "typescript",
+    "ioc",
+    "di",
+    "annotations",
+    "decorators"
+  ],
+  "author": {
+    "name": "Miguel Serrano",
+    "email": "mserranom@gmail.com",
+    "url": "http://github.com/mserranom"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mserranom/container-ts/issues"
+  }
+}
