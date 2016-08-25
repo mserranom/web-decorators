@@ -2,7 +2,15 @@
 
 import {Readable} from 'stream'
 
-import {start, stop, RequestMapping, Route, Middleware, GET, POST} from '../src/express_decorators';
+import {Application} from 'express';
+
+import {Server} from 'http';
+
+import {configureObject, RequestMapping, Route, Middleware, GET, POST} from '../src/express_decorators';
+
+import * as express from 'express';
+const bodyParser : any = require('body-parser');
+
 
 async function sleep(ms:number) : Promise<any> {
     return new Promise<void>(function(resolve) {
@@ -22,11 +30,50 @@ function setupChai() {
 }
 
 var expect = require('chai').expect;
-setupChai();
-
 var request : any = require('request-promise');
 
 
+setupChai();
+
+
+let app : express.Application;
+let server : Server;
+
+
+
+
+// ------------------
+// EXPRESS BOOTSTRAP
+// ------------------
+
+
+function startExpress(port : number) : Promise<void> {
+
+    app = express();
+
+    app.use(bodyParser.json());
+
+    return new Promise<void>(function(resolve, reject) {
+        server = app.listen(port, () =>  resolve());
+    });
+}
+
+async function start(port : number, configs : Array<any>) : Promise<void> {
+    await startExpress(port);
+    configs.forEach(expressConfig => configureObject(expressConfig, app));
+}
+
+async function configureExpress(application: Application, configs : Array<any>) : Promise<void> {
+    app = application;
+    configs.forEach(expressConfig => configureObject(expressConfig, app));
+}
+
+function stop() : void {
+    if(!server) {
+        throw new Error("express server cannot be stopped, either it doesn't exist or is controlled externally");
+    }
+    server.close();
+}
 
 
 // ----------

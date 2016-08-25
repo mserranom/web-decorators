@@ -1,14 +1,8 @@
 "use strict";
 
 import {Application, Request, Response, Router} from 'express';
-import {Server} from 'http';
+
 import {Stream, Readable} from 'stream';
-import * as express from "express";
-
-const bodyParser : any = require('body-parser');
-
-let server : Server;
-let app : Application;
 
 
 
@@ -39,40 +33,6 @@ interface DecoratedObject {
 }
 
 const DECORATORS_PROP = '__rest__decorators__configuration';
-
-
-
-// ------------------
-// EXPRESS BOOTSTRAP
-// ------------------
-
-
-function startExpress(port : number) : Promise<void> {
-
-    app = express();
-    app.use(bodyParser.json());
-
-    return new Promise<void>(function(resolve, reject) {
-        server = app.listen(port, () =>  resolve());
-    });
-}
-
-export async function start(port : number, configs : Array<any>) : Promise<void> {
-    await startExpress(port);
-    configs.forEach(expressConfig => configureObject(expressConfig));
-}
-
-export async function configureExpress(application: Application, configs : Array<any>) : Promise<void> {
-    app = application;
-    configs.forEach(expressConfig => configureObject(expressConfig));
-}
-
-export function stop() : void {
-    if(!server) {
-        throw new Error("express server cannot be stopped, either it doesn't exist or is controlled externally");
-    }
-    server.close();
-}
 
 
 
@@ -161,7 +121,7 @@ function resolveDecoratorConfig(target : any) : DecoratorConfig {
 // ------------------
 
 
-function configureObject(target : DecoratedObject) {
+export function configureObject(target : DecoratedObject, app) {
 
     let config = target.__rest__decorators__configuration;
 
