@@ -2,9 +2,9 @@
 
 import {Application, Request, Response, Router} from 'express';
 import {Server} from 'http';
-import {Stream, Readable} from 'stream'
+import {Stream, Readable} from 'stream';
+import * as express from "express";
 
-const express : any = require('express');
 const bodyParser : any = require('body-parser');
 
 let server : Server;
