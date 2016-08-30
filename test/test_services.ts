@@ -35,11 +35,6 @@ export class TestEndpoint {
 
     private data: TestEntity = new TestEntity();
 
-    @RequestMapping('get', '/ping')
-    pong(): string {
-        return 'pong!';
-    }
-
     @RequestMapping('POST', '/entities')
     @Middleware([emptyMiddleware, zeroIdCheckMiddleware, emptyMiddleware])
     setData(data: TestEntity): void {

@@ -12,29 +12,6 @@ describe('REST decorators:', () => {
 
     describe('routing:', () => {
 
-        it('single endpoint defined in single class',  async function(done) {
-
-            await startServer([new TestEndpoint()]);
-
-            let pong = await doGet('/ping');
-            expect(pong).equals('pong!');
-
-            done();
-        });
-
-        it('endpoints defined in multiple classes',  async function(done) {
-
-            await startServer([new TestEndpoint(), new TestEndpoint2()]);
-
-            let pong = await doGet('/ping');
-            expect(pong).equals('pong!');
-
-            let hi = await doGet('/hi');
-            expect(hi).equals('hello!');
-
-            done();
-        });
-
         it('sending a string body in a POST method',  async function(done) {
             await startServer([new TestEndpoint(), new TestEndpoint2()]);
 
