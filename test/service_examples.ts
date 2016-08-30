@@ -1,11 +1,4 @@
 import {RequestMapping, Route, Middleware, GET, POST} from '../src/express_decorators';
-import {Readable} from 'stream'
-
-async function sleep(ms:number) : Promise<any> {
-    return new Promise<void>(function(resolve) {
-        setTimeout(function(){ resolve() }, ms);
-    });
-}
 
 let emptyMiddleware = (req, res, next) => next();
 
@@ -46,43 +39,6 @@ export class TestEndpoint {
         return (this.data.id === id) ? this.data : undefined;
     }
 
-    @RequestMapping('GET', '/async_entities/:id')
-    async getAsyncData(id: string): Promise<TestEntity> {
-        await sleep(1);
-        return (this.data.id === id) ? this.data : undefined;
-    }
-
-    @RequestMapping('GET', '/wrong')
-    throwError(): TestEntity {
-        throw new Error('error thrown');
-    }
-
-    @RequestMapping('GET', '/wrong_async')
-    async throwAsyncError(): Promise<void> {
-        await sleep(1);
-        throw new Error('error thrown');
-    }
-
-    @RequestMapping('GET', '/stream_data')
-    pipeData(): Readable {
-        let stream = new Readable();
-        stream._read = function noop() {
-        }; // redundant? see update below
-        stream.push('data piped correctly!');
-        stream.push(null);
-        return stream;
-    }
-
-    @RequestMapping('get', '/numbers/:id', ['from', 'to'])
-    sliceNumbers(id: string, from: number, to: number): Array<number> {
-        let data = [3, 4, 5, 6, 7];
-        if (id == '101') {
-            return data.slice(from, to);
-        } else {
-            throw new Error('unknown id');
-        }
-    }
-
     @GET('/header_data/:id', ['query'], ['header1', 'header2'])
     dataWithHeaders(id: string, query: string, header1: string, header2: string): string {
         if (id == 'myId' && query == 'myQuery' && header1 == 'myHeader1' && header2 == 'myHeader2') {
@@ -91,7 +47,6 @@ export class TestEndpoint {
             throw new Error('unknown input');
         }
     }
-
 }
 
 @Route('/hi')

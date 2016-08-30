@@ -10,7 +10,7 @@ async function sleep(ms:number) : Promise<any> {
     });
 }
 
-describe('Error Handling:', () => {
+describe('error handling', () => {
 
     afterEach( () => {
         stopServer();

@@ -4,7 +4,7 @@ import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
-describe('GET parameter unfolding:', () => {
+describe('GET parameter unfolding', () => {
 
     afterEach( () => {
         stopServer();

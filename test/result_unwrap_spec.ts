@@ -1,36 +1,78 @@
-import {TestEndpoint, TestEndpoint2, TestEntity} from './test_services'
-import {doPost, doGet, startServer, stopServer, mochaAsync} from './test_utils'
+import {GET,} from '../src/express_decorators';
+import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
-describe('Handler Result Unwrapping', () => {
+import {Readable} from 'stream'
+
+describe('return value unwrapping', () => {
 
     afterEach( () => {
         stopServer();
     });
 
-    it('GET an undefined entity should return an empty string', mochaAsync(async () => {
+    it('an undefined result should be unwrapped to an empty string', mochaAsync(async () => {
 
-        await startServer([new TestEndpoint()]);
+        class TestService {
+            @GET('/undefined')
+            undefinedResult() {
+                return undefined;
+            }
+        }
 
-        let fetchedEntity = await doGet('/entities/foo');
-        expect(fetchedEntity).equal('');
+        await startServer([new TestService()]);
+
+        let result = await doGet('/undefined');
+        expect(result).equal('');
+    }));
+
+    it.skip('a null result should be unwrapped to an empty string', mochaAsync(async () => {
+
+        class TestService {
+            @GET('/null')
+            nullResult() {
+                return null;
+            }
+        }
+
+        await startServer([new TestService()]);
+
+        let result = await doGet('/null');
+        expect(result).equal('');
     }));
 
     it('promise result should be sent to response', mochaAsync(async () => {
 
-        await startServer([new TestEndpoint()]);
+        class TestService {
+            @GET('/entity')
+            getPromisedEntity() {
+                return new Promise((resolve) => setTimeout(() => resolve({id : '101', name: 'entity'}), 1));
+            }
+        }
 
-        let fetchedEntity = await doGet('/async_entities/101');
+        await startServer([new TestService()]);
+
+        let fetchedEntity = await doGet('/entity');
         expect(JSON.parse(fetchedEntity)).deep.equal({id : '101', name: 'entity'});
     }));
 
+
     it('returned readable streams should be piped to the response', mochaAsync(async () => {
 
-        await startServer([new TestEndpoint()]);
+        class TestService {
+            @GET('/stream_data')
+            getEntity() {
+                let stream = new Readable();
+                stream._read = function noop() {}; // redundant?
+                stream.push('data piped correctly!');
+                stream.push(null);
+                return stream;
+            }
+        }
+
+        await startServer([new TestService()]);
 
         let result = await doGet('/stream_data');
-
         expect(result).equal('data piped correctly!');
     }));
 });
