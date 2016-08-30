@@ -30,6 +30,30 @@ describe('Basic Routing:', () => {
             done();
         });
 
+        it('two endpoints defined in single class',  async function(done) {
+
+            class TestService {
+                @GET('/ping')
+                pong(): string {
+                    return 'pong!';
+                }
+                @GET('/hi')
+                hello(): string {
+                    return 'hello!';
+                }
+            }
+
+            await startServer([new TestService()]);
+
+            let pong = await doGet('/ping');
+            expect(pong).equals('pong!');
+
+            let hello = await doGet('/hi');
+            expect(hello).equals('hello!');
+
+            done();
+        });
+
         it('two endpoints defined in separate classes',  async function(done) {
 
             class PingService {

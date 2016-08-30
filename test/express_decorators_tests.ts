@@ -41,16 +41,6 @@ describe('REST decorators:', () => {
             done();
         });
 
-        it('query parameters are passed to the method',  async function(done) {
-
-            await startServer([new TestEndpoint(), new TestEndpoint2()]);
-
-            let fetchedData = await doGet('/numbers/101?from=1&to=3');
-            expect(JSON.parse(fetchedData)).deep.equal([4,5]);
-
-            done();
-        });
-
         it('unneeded query parameters are ignored',  async function(done) {
 
             await startServer([new TestEndpoint(), new TestEndpoint2()]);
