@@ -1,17 +1,16 @@
 import {GET} from '../src/express_decorators';
 
-import {doGet, startServer, stopServer} from './test_utils'
+import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
 describe('GET parameter unfolding:', () => {
 
-    afterEach( (done) => {
+    afterEach( () => {
         stopServer();
-        done();
     });
 
-    it('single route parameters',  async function(done) {
+    it('single route parameters',  mochaAsync(async () => {
 
         class HelloService {
             @GET('/hello/:name')
@@ -24,11 +23,9 @@ describe('GET parameter unfolding:', () => {
 
         let pong = await doGet('/hello/joe');
         expect(pong).equals('hello joe!');
+    }));
 
-        done();
-    });
-
-    it('multiple route parameters',  async function(done) {
+    it('multiple route parameters',  mochaAsync(async () => {
 
         class HelloService {
             @GET('/hello/:name/:message')
@@ -41,11 +38,9 @@ describe('GET parameter unfolding:', () => {
 
         let pong = await doGet('/hello/joe/cheers');
         expect(pong).equals('hello joe, cheers!');
+    }));
 
-        done();
-    });
-
-    it('query parameters',  async function(done) {
+    it('query parameters',  mochaAsync(async () => {
 
         class HelloService {
             @GET('/hello', ['name', 'message'])
@@ -58,11 +53,9 @@ describe('GET parameter unfolding:', () => {
 
         let pong = await doGet('/hello?name=joe&message=cheers');
         expect(pong).equals('hello joe, cheers!');
+    }));
 
-        done();
-    });
-
-    it('route and query parameters combined',  async function(done) {
+    it('route and query parameters combined',  mochaAsync(async () => {
 
         class HelloService {
             @GET('/hello/:name', ['message'])
@@ -75,11 +68,9 @@ describe('GET parameter unfolding:', () => {
 
         let pong = await doGet('/hello/joe?message=cheers');
         expect(pong).equals('hello joe, cheers!');
+    }));
 
-        done();
-    });
-
-    it('multiple route and query parameters combined',  async function(done) {
+    it('multiple route and query parameters combined', mochaAsync(async () => {
 
         class HelloService {
             @GET('/hello/:name/friend/:friend_name', ['message1', 'message2'])
@@ -93,7 +84,20 @@ describe('GET parameter unfolding:', () => {
 
         let pong = await doGet('/hello/joe/friend/michael?message1=cheers&message2=good_luck');
         expect(pong).equals('hello michael, friend of joe, cheers and good_luck!');
+    }));
 
-        done();
-    });
+    it('unnecessary query parameters should be ignored',  mochaAsync(async () => {
+
+        class RangeService {
+            @GET('/range', ['from', 'to'])
+            range(from: number, to: number): Array<number> {
+                return [3, 4, 5, 6, 7].slice(from, to);
+            }
+        }
+
+        await startServer([new RangeService()]);
+
+        let fetchedData = await doGet('/range?unused=foo&from=2&foo=0&to=5');
+        expect(JSON.parse(fetchedData)).deep.equal([5,6,7]);
+    }));
 });

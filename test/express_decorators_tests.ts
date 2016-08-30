@@ -41,16 +41,6 @@ describe('REST decorators:', () => {
             done();
         });
 
-        it('unneeded query parameters are ignored',  async function(done) {
-
-            await startServer([new TestEndpoint(), new TestEndpoint2()]);
-
-            let fetchedData = await doGet('/numbers/101?unused=foo&from=2&foo=0&to=5');
-            expect(JSON.parse(fetchedData)).deep.equal([5,6,7]);
-
-            done();
-        });
-
         it('headers are passed to the method',  async function(done) {
 
             await startServer([new TestEndpoint(), new TestEndpoint2()]);
@@ -60,40 +50,7 @@ describe('REST decorators:', () => {
 
             done();
         });
-
-        it('GET an undefined entity returns empty string',  async function(done) {
-
-            await startServer([new TestEndpoint()]);
-
-            let fetchedEntity = await doGet('/entities/foo');
-            expect(fetchedEntity).equal('');
-
-            done();
-        });
-
-        it('promises are resolved correctly',  async function(done) {
-
-            await startServer([new TestEndpoint()]);
-
-            let fetchedEntity = await doGet('/async_entities/101');
-            expect(JSON.parse(fetchedEntity)).deep.equal({id : '101', name: 'entity'});
-
-            done();
-        });
-
-        it('methods returning readable streams are piped to the response',  async function(done) {
-
-            await startServer([new TestEndpoint()]);
-
-            let result = await doGet('/stream_data');
-
-            expect(result).equal('data piped correctly!');
-
-            done();
-        });
-
     });
-
 });
 
 
