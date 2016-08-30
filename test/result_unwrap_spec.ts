@@ -26,7 +26,7 @@ describe('return value unwrapping', () => {
         expect(result).equal('');
     }));
 
-    it.skip('a null result should be unwrapped to an empty string', mochaAsync(async () => {
+    it('a null result should be unwrapped to an empty string', mochaAsync(async () => {
 
         class TestService {
             @GET('/null')

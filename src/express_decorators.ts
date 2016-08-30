@@ -1,11 +1,5 @@
-"use strict";
-
-import {Application, Request, Response, Router} from 'express';
-
+import {Request, Response} from 'express';
 import {Stream, Readable} from 'stream';
-
-
-
 
 // ------------------
 // DATA TYPES
@@ -28,11 +22,12 @@ interface DecoratorConfig {
     endpointMiddleware : Map<string, Array<any>>
 }
 
-interface DecoratedObject {
-     __rest__decorators__configuration  : DecoratorConfig;
+function resolveDecoratorConfig(target : any) : DecoratorConfig {
+    const DECORATORS_PROP = '__web__decorators__config';
+    target[DECORATORS_PROP] = target[DECORATORS_PROP]
+        || { endpoints : [], route : '', query : [] , middleware : [], endpointMiddleware : new Map(), headers : []};
+    return target[DECORATORS_PROP];
 }
-
-const DECORATORS_PROP = '__rest__decorators__configuration';
 
 
 
@@ -106,24 +101,15 @@ export function Middleware(middleware: any | Array<any>) {
     }
 }
 
-function resolveDecoratorConfig(target : any) : DecoratorConfig {
-    target[DECORATORS_PROP] = target[DECORATORS_PROP]
-        || { endpoints : [], route : '', query : [] , middleware : [], endpointMiddleware : new Map(), headers : []};
-    let decoratedObject : DecoratedObject = target;
-    return decoratedObject.__rest__decorators__configuration;
-}
-
-
-
 
 // ------------------
 // RUNTIME
 // ------------------
 
 
-export function configureObject(target : DecoratedObject, app) {
+export function configureObject(target : any, app) {
 
-    let config = target.__rest__decorators__configuration;
+    let config = resolveDecoratorConfig(target);
 
     let configureEndpoint = (endpoint : EndpointConfig) => {
 
@@ -188,7 +174,11 @@ export function configureObject(target : DecoratedObject, app) {
 }
 
 function isPromise(object : any) : boolean {
-    return typeof object === 'object' && typeof object.then === 'function'
+    if(!object) {
+        return false;
+    } else {
+        return typeof object === 'object' && typeof object.then === 'function';
+    }
 }
 
 function isReadableStream(obj) {
