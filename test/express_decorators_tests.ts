@@ -4,28 +4,15 @@ import {Application} from 'express';
 
 import {Server} from 'http';
 
-import {configureObject, RequestMapping, Route, Middleware, GET, POST} from '../src/express_decorators';
+import {configureObject} from '../src/express_decorators';
 
 import {TestEndpoint, TestEndpoint2, TestEntity} from './test_services'
 
 import * as express from 'express';
 const bodyParser : any = require('body-parser');
 
-function setupChai() {
-    var chai = require('chai');
-    chai.should(); // enables use of should object
-
-    var chaiAsPromised = require('chai-as-promised');
-    chai.use(chaiAsPromised);
-
-    var chaiThings = require('chai-things');
-    chai.use(chaiThings);
-}
-
 var expect = require('chai').expect;
 var request : any = require('request-promise');
-
-setupChai();
 
 let app : express.Application;
 let server : Server;
@@ -232,65 +219,6 @@ describe('REST decorators:', () => {
 
             expect(result).equal('data piped correctly!');
 
-            done();
-        });
-
-    });
-
-    describe('middleware:', () => {
-
-        it('method defined middleware can fail request',  async function(done) {
-
-            await start(PORT, [new TestEndpoint(), new TestEndpoint2()]);
-
-            let newEntity = new TestEntity();
-            newEntity.id = '0';
-
-            try {
-                await doPost('/entities', newEntity);
-            } catch(error) {
-                expect(error.statusCode).equal(413);
-                done();
-            }
-
-            expect(true).equal(false);
-            done();
-        });
-
-        it('class defined middleware can fail request',  async function(done) {
-
-            await start(PORT, [new TestEndpoint(), new TestEndpoint2()]);
-
-            let newEntity = new TestEntity();
-            newEntity.name = null;
-
-            try {
-                await doPost('/entities', newEntity);
-            } catch(error) {
-                expect(error.statusCode).equal(414);
-                done();
-            }
-
-            expect(true).equal(false);
-            done();
-        });
-
-        it('class middleware is executed before method middleware',  async function(done) {
-
-            await start(PORT, [new TestEndpoint(), new TestEndpoint2()]);
-
-            let newEntity = new TestEntity();
-            newEntity.id = '0';
-            newEntity.name = null;
-
-            try {
-                await doPost('/entities', newEntity);
-            } catch(error) {
-                expect(error.statusCode).equal(414);
-                done();
-            }
-
-            expect(true).equal(false);
             done();
         });
 
