@@ -1,7 +1,7 @@
 import {TestEndpoint, TestEndpoint2, TestEntity} from './test_services'
 import {doPost, startServer, stopServer} from './test_utils'
 
-const expect = require('chai').expect;
+import {expect} from 'chai';
 
 describe('REST decorators:', () => {
 

@@ -2,6 +2,11 @@
   "name": "web-decorators",
   "version": "0.1.0-latest",
   "dependencies": {
+    "@types/chai": {
+      "version": "3.4.32",
+      "from": "@types/chai@latest",
+      "resolved": "https://registry.npmjs.org/@types/chai/-/chai-3.4.32.tgz"
+    },
     "@types/express": {
       "version": "4.0.30",
       "from": "@types/express@4.0.30",
