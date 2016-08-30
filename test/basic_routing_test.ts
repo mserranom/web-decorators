@@ -1,18 +1,17 @@
 import {GET, Route} from '../src/express_decorators';
-import {doGet, startServer, stopServer} from './test_utils'
+import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
 describe('Basic Routing:', () => {
 
-    afterEach( (done) => {
+    afterEach( () => {
         stopServer();
-        done();
     });
 
     describe('routing:', () => {
 
-        it('single endpoint defined in single class',  async function(done) {
+        it('single endpoint defined in single class',  mochaAsync(async () => {
 
             class PingService {
                 @GET('/ping')
@@ -25,11 +24,9 @@ describe('Basic Routing:', () => {
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
+        }));
 
-            done();
-        });
-
-        it('two endpoints defined in single class',  async function(done) {
+        it('two endpoints defined in single class',  mochaAsync(async () => {
 
             class TestService {
                 @GET('/ping')
@@ -49,11 +46,9 @@ describe('Basic Routing:', () => {
 
             let hello = await doGet('/hi');
             expect(hello).equals('hello!');
+        }));
 
-            done();
-        });
-
-        it('two endpoints defined in separate classes',  async function(done) {
+        it('two endpoints defined in separate classes',  mochaAsync(async () => {
 
             class PingService {
                 @GET('/ping')
@@ -76,12 +71,10 @@ describe('Basic Routing:', () => {
 
             let hello = await doGet('/hi');
             expect(hello).equals('hello!');
-
-            done();
-        });
+        }));
 
 
-        it('class-level routing',  async function(done) {
+        it('class-level routing',  mochaAsync(async () => {
 
             @Route('/ping_service')
             class PingService {
@@ -95,11 +88,9 @@ describe('Basic Routing:', () => {
 
             let pong = await doGet('/ping_service/ping');
             expect(pong).equals('pong!');
+        }));
 
-            done();
-        });
-
-        it.skip('class-level routing does not require initial / character',  async function(done) {
+        it.skip('class-level routing does not require initial / character',  mochaAsync(async () => {
 
             @Route('ping_service')
             class PingService {
@@ -113,11 +104,9 @@ describe('Basic Routing:', () => {
 
             let pong = await doGet('/ping_service/ping');
             expect(pong).equals('pong!');
+        }));
 
-            done();
-        });
-
-        it('nested routes',  async function(done) {
+        it('nested routes',  mochaAsync(async () => {
 
             @Route('/ping_service/nested_route/service')
             class PingService {
@@ -131,9 +120,7 @@ describe('Basic Routing:', () => {
 
             let pong = await doGet('/ping_service/nested_route/service/ping');
             expect(pong).equals('pong!');
-
-            done();
-        });
+        }));
 
     });
 

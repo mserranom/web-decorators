@@ -1,6 +1,6 @@
 import {GET} from '../src/express_decorators';
 
-import {doGet, startServer, stopServer} from './test_utils'
+import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -12,12 +12,11 @@ async function sleep(ms:number) : Promise<any> {
 
 describe('Error Handling:', () => {
 
-    afterEach( (done) => {
+    afterEach( () => {
         stopServer();
-        done();
     });
 
-    it('a sync Error should should return a HTTP Code 500',  async function(done) {
+    it('a sync Error should should return a HTTP Code 500',  mochaAsync(async () => {
 
         class TestService {
             @GET('/wrong')
@@ -32,15 +31,11 @@ describe('Error Handling:', () => {
             await doGet('/wrong');
         } catch(error) {
             expect(error.statusCode).equal(500);
-            done();
+            expect(JSON.parse(error.error).message).equals('Error: error thrown');
         }
+    }));
 
-        expect(true).equal(false);
-
-        done();
-    });
-
-    it.skip('an unhandled async Error should return a HTTP Code 500',  async function(done) {
+    it.skip('an unhandled async Error should return a HTTP Code 500',  mochaAsync(async () => {
 
         class TestService {
             @GET('/wrong_async')
@@ -55,14 +50,11 @@ describe('Error Handling:', () => {
             await doGet('/wrong_async');
         } catch(error) {
             expect(error.statusCode).equal(500);
-            done();
+            expect(JSON.parse(error.error).message).equals('Error: error thrown');
         }
+    }));
 
-        expect(true).equal(false);
-        done();
-    });
-
-    it('an async Error thrown while waiting for a Promise should return a HTTP Code 500',  async function(done) {
+    it('an async Error thrown while waiting for a Promise should return a HTTP Code 500',  mochaAsync(async () => {
 
         class TestService {
             @GET('/wrong_async_promise')
@@ -78,14 +70,11 @@ describe('Error Handling:', () => {
             await doGet('/wrong_async_promise');
         } catch(error) {
             expect(error.statusCode).equal(500);
-            done();
+            expect(JSON.parse(error.error).message).equals('Error: error thrown');
         }
+    }));
 
-        expect(true).equal(false);
-        done();
-    });
-
-    it.skip('a rejected Promise should return a HTTP Code 500',  async function(done) {
+    it.skip('a rejected Promise should return a HTTP Code 500',  mochaAsync(async () => {
 
         class TestService {
             @GET('/reject_promise')
@@ -100,12 +89,8 @@ describe('Error Handling:', () => {
             await doGet('/reject_promise');
         } catch(error) {
             expect(error.statusCode).equal(500);
-            done();
         }
-
-        expect(true).equal(false);
-        done();
-    });
+    }));
 
 
 });

@@ -43,3 +43,14 @@ export async function doPost(endpoint : string, body : Object) : Promise<string>
     return await request({ method: 'POST', uri : 'http://localhost:' + PORT + endpoint,
         body : body, json: true});
 }
+
+export const mochaAsync = (fn) => {
+    return async (done) => {
+        try {
+            await fn();
+            done();
+        } catch (err) {
+            done(err);
+        }
+    };
+};
