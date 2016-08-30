@@ -71,23 +71,6 @@ describe('REST decorators:', () => {
             done();
         });
 
-        it('a sync Error in the handler returns a 500 error',  async function(done) {
-
-            await startServer([new TestEndpoint()]);
-
-            try {
-                await doGet('/wrong');
-            } catch(error) {
-                expect(error.statusCode).equal(500);
-                done();
-            }
-
-            expect(true).equal(false);
-
-            done();
-        });
-
-
         it('promises are resolved correctly',  async function(done) {
 
             await startServer([new TestEndpoint()]);
@@ -95,22 +78,6 @@ describe('REST decorators:', () => {
             let fetchedEntity = await doGet('/async_entities/101');
             expect(JSON.parse(fetchedEntity)).deep.equal({id : '101', name: 'entity'});
 
-            done();
-        });
-
-
-        it('an async Error thrown while handling a promise returns a 500 error',  async function(done) {
-
-            await startServer([new TestEndpoint()]);
-
-            try {
-                await doGet('/wrong_async');
-            } catch(error) {
-                expect(error.statusCode).equal(500);
-                done();
-            }
-
-            expect(true).equal(false);
             done();
         });
 
