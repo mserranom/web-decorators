@@ -1,4 +1,4 @@
-import {TestEndpoint, TestEndpoint2, TestEntity} from './service_examples'
+import {TestEndpoint, TestEntity} from './service_examples'
 import {doPost, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
@@ -11,7 +11,7 @@ describe('middleware', () => {
 
     it('method-level defined middleware can fail request',  mochaAsync(async () => {
 
-        await startServer([new TestEndpoint(), new TestEndpoint2()]);
+        await startServer([new TestEndpoint()]);
 
         let newEntity = new TestEntity();
         newEntity.id = '0';
@@ -25,7 +25,7 @@ describe('middleware', () => {
 
     it('class-level defined middleware can fail request',  mochaAsync(async () => {
 
-        await startServer([new TestEndpoint(), new TestEndpoint2()]);
+        await startServer([new TestEndpoint()]);
 
         let newEntity = new TestEntity();
         newEntity.name = null;
@@ -39,7 +39,7 @@ describe('middleware', () => {
 
     it('class-level middleware is executed before method-level middleware',  mochaAsync(async () => {
 
-        await startServer([new TestEndpoint(), new TestEndpoint2()]);
+        await startServer([new TestEndpoint()]);
 
         let newEntity = new TestEntity();
         newEntity.id = '0';
