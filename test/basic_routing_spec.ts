@@ -88,6 +88,22 @@ describe('basic GET routing', () => {
         expect(pong).equals('pong!');
     }));
 
+    it('class-level routing with empty method route',  mochaAsync(async () => {
+
+        @Route('/ping')
+        class PingService {
+            @GET()
+            pong(): string {
+                return 'pong!';
+            }
+        }
+
+        await startServer([new PingService()]);
+
+        let pong = await doGet('/ping');
+        expect(pong).equals('pong!');
+    }));
+
     it.skip('class-level routing should not require initial slash "/" character',  mochaAsync(async () => {
 
         @Route('ping_service')

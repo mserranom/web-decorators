@@ -1,4 +1,5 @@
-import {TestEndpoint, TestEndpoint2, TestEntity} from './service_examples'
+import {GET, POST, Route} from '../src/express_decorators';
+// import {TestEndpoint, TestEntity} from './service_examples'
 import {doPost, doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
@@ -10,7 +11,15 @@ describe('POST parameter unfolding', () => {
     });
 
     it('sending a string body in a POST method',  mochaAsync(async () => {
-        await startServer([new TestEndpoint(), new TestEndpoint2()]);
+
+        @Route('/hi')
+        class TestService {
+            private message = 'hello!';
+            @POST() setMessage(message: string): void { this.message = message; }
+            @GET()  getMessage(): string { return this.message; }
+        }
+
+        await startServer([new TestService()]);
 
         let hi = await doGet('/hi');
         expect(hi).equals('hello!');
@@ -21,22 +30,41 @@ describe('POST parameter unfolding', () => {
     }));
 
     it('sending an object as body in a POST method',  mochaAsync(async () => {
-        await startServer([new TestEndpoint(), new TestEndpoint2()]);
 
-        let fetchedEntity = await doGet('/entities/101');
-        expect(JSON.parse(fetchedEntity)).deep.equal({id : '101', name: 'entity'});
+        interface TestEntity{
+            name: string;
+            id: string;
+        }
 
-        let newEntity = new TestEntity();
-        newEntity.id = '1220';
+        class TestService {
+            data: TestEntity;
+            @POST('/entity') setData(data: TestEntity): void { this.data = data; }
+        }
 
-        await doPost('/entities', newEntity);
-        fetchedEntity = await doGet('/entities/1220');
-        expect(JSON.parse(fetchedEntity)).deep.equal({id : '1220', name: 'entity'});
+        let service = new TestService();
+
+        await startServer([service]);
+
+        let entity = { name: 'entity', id: '101'};
+        await doPost('/entity', entity);
+
+        expect(entity).deep.equal(service.data);
     }));
 
     it('headers are passed to the method',  mochaAsync(async () => {
 
-        await startServer([new TestEndpoint(), new TestEndpoint2()]);
+        class TestService {
+            @GET('/header_data/:id', ['query'], ['header1', 'header2'])
+            dataWithHeaders(id: string, query: string, header1: string, header2: string): string {
+                if (id == 'myId' && query == 'myQuery' && header1 == 'myHeader1' && header2 == 'myHeader2') {
+                    return 'pong';
+                } else {
+                    throw new Error('unknown input');
+                }
+            }
+        }
+
+        await startServer([new TestService()]);
 
         let fetchedData = await doGet('/header_data/myId?query=myQuery',{header1:'myHeader1',header2:'myHeader2'});
         expect(fetchedData).equals('pong');
