@@ -171,7 +171,7 @@ describe('basic GET routing', () => {
             expect(pong).equals('pong!');
         }));
 
-        it.skip('slash route defined at class-level and should resolve method-level routes correctly',  mochaAsync(async () => {
+        it('slash route defined at class-level and should resolve method-level routes correctly',  mochaAsync(async () => {
 
             @Route('/')
             class PingService {

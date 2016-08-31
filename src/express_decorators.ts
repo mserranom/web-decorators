@@ -41,7 +41,11 @@ export function Route(route : string) {
 
     return function (target:any) {
         let config : ServiceConfig = resolveServiceConfig(target.prototype);
-        config.route = (route.charAt(0) === "/") ? route : "/" + route;
+        if(route === '/') {
+            config.route = ''; // to prevent 2 slashes when joining service route + endpoint route
+        } else {
+            config.route = (route.charAt(0) === '/') ? route : '/' + route;
+        }
     }
 }
 
@@ -106,7 +110,7 @@ export function Middleware(middleware: any | Array<any>) {
 
 export function configureExpressService(target : any, app) {
 
-    let config = resolveServiceConfig(target);
+    let serviceConfig = resolveServiceConfig(target);
 
     let configureEndpoint = (endpoint : EndpointConfig) => {
 
@@ -146,10 +150,10 @@ export function configureExpressService(target : any, app) {
             }
         };
 
-        let args : Array<any> = [config.route + endpoint.route].concat(config.middleware);
+        let args : Array<any> = [serviceConfig.route + endpoint.route].concat(serviceConfig.middleware);
 
-        if(config.endpointMiddleware.has(endpoint.handler)) {
-            args = args.concat(config.endpointMiddleware.get(endpoint.handler));
+        if(serviceConfig.endpointMiddleware.has(endpoint.handler)) {
+            args = args.concat(serviceConfig.endpointMiddleware.get(endpoint.handler));
         }
 
         args.push(requestHandler);
@@ -157,7 +161,7 @@ export function configureExpressService(target : any, app) {
         app[endpoint.method].apply(app, args);
     };
 
-    config.endpoints.forEach(x => configureEndpoint(x));
+    serviceConfig.endpoints.forEach(x => configureEndpoint(x));
 }
 
 function isPromise(object : any) : boolean {
