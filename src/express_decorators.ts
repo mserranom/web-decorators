@@ -189,6 +189,8 @@ function unwrapBody(body : any) : any {
 }
 
 function wrapErrorBody(body : any) : any {
+    body = body ? body : '';
+
     //TODO: [Object object] might not be the best way to check this when the method is overriden
     if(body.toString() == '[object Object]' && isStringifiable(body)) {
         return body;

@@ -77,7 +77,7 @@ describe('error handling', () => {
         }
     }));
 
-    it.skip('a rejected Promise should return a HTTP Code 500',  mochaAsync(async () => {
+    it('a rejected Promise should return a HTTP Code 500',  mochaAsync(async () => {
 
         class TestService {
             @GET('/reject_promise')
