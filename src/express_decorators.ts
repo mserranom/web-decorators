@@ -15,18 +15,18 @@ interface EndpointConfig {
     headers : Array<string>;
 }
 
-interface DecoratorConfig {
+interface ServiceConfig {
     endpoints : Array<EndpointConfig>;
     route : string;
     middleware : Array<any>
     endpointMiddleware : Map<string, Array<any>>
 }
 
-function resolveDecoratorConfig(target : any) : DecoratorConfig {
+function resolveServiceConfig(service : any) : ServiceConfig {
     const DECORATORS_PROP = '__web__decorators__config';
-    target[DECORATORS_PROP] = target[DECORATORS_PROP]
+    service[DECORATORS_PROP] = service[DECORATORS_PROP]
         || { endpoints : [], route : '', query : [] , middleware : [], endpointMiddleware : new Map(), headers : []};
-    return target[DECORATORS_PROP];
+    return service[DECORATORS_PROP];
 }
 
 
@@ -40,23 +40,21 @@ function resolveDecoratorConfig(target : any) : DecoratorConfig {
 export function Route(route : string) {
 
     return function (target:any) {
-
-        let config : DecoratorConfig = resolveDecoratorConfig(target.prototype);
-
-        config.route = route;
+        let config : ServiceConfig = resolveServiceConfig(target.prototype);
+        config.route = (route.charAt(0) === "/") ? route : "/" + route;
     }
 }
 
 export const GET = (route? : string, queryParams? : Array<string>, headers? : Array<string>) =>
-    RequestMapping('get', route, queryParams, headers);
+    Endpoint('get', route, queryParams, headers);
 export const POST = (route? : string, queryParams? : Array<string>, headers? : Array<string>) =>
-    RequestMapping('post', route, queryParams, headers);
+    Endpoint('post', route, queryParams, headers);
 export const PUT = (route? : string, queryParams? : Array<string>, headers? : Array<string>) =>
-    RequestMapping('put', route, queryParams, headers);
+    Endpoint('put', route, queryParams, headers);
 export const DELETE = (route? : string, queryParams? : Array<string>, headers? : Array<string>) =>
-    RequestMapping('delete', route, queryParams, headers);
+    Endpoint('delete', route, queryParams, headers);
 
-export function RequestMapping(method: string, route? : string, queryParams? : Array<string>, headers? : Array<string>) {
+export function Endpoint(method: string, route? : string, queryParams? : Array<string>, headers? : Array<string>) {
 
     route = route || '';
     queryParams = queryParams || [];
@@ -64,11 +62,11 @@ export function RequestMapping(method: string, route? : string, queryParams? : A
 
     return function (target:any, propertyKey:any) {
 
-        let config : DecoratorConfig = resolveDecoratorConfig(target);
+        let config : ServiceConfig = resolveServiceConfig(target);
 
         config.endpoints.push({
             method : method.toLowerCase(),
-            route : route,
+            route : (route.charAt(0) === '/') ? route : '/' + route,
             params : extractRouteParams(route),
             query : queryParams,
             headers : headers,
@@ -92,10 +90,10 @@ export function Middleware(middleware: any | Array<any>) {
     return function (target:any, propertyKey?:any) {
 
         if(propertyKey) {
-            let config : DecoratorConfig =  resolveDecoratorConfig(target);
+            let config : ServiceConfig =  resolveServiceConfig(target);
             config.endpointMiddleware.set(propertyKey, [].concat(middleware))
         } else {
-            let config : DecoratorConfig =  resolveDecoratorConfig(target.prototype);
+            let config : ServiceConfig =  resolveServiceConfig(target.prototype);
             config.middleware = [].concat(middleware);
         }
     }
@@ -106,51 +104,40 @@ export function Middleware(middleware: any | Array<any>) {
 // RUNTIME
 // ------------------
 
+export function configureExpressService(target : any, app) {
 
-export function configureObject(target : any, app) {
-
-    let config = resolveDecoratorConfig(target);
+    let config = resolveServiceConfig(target);
 
     let configureEndpoint = (endpoint : EndpointConfig) => {
 
         let requestHandler = (req : Request, response : Response) => {
-            let args = endpoint.params.map(x => req.params[x]);
-
-            args = args.concat(endpoint.query.map(x => req.query[x]));
-            args = args.concat(endpoint.headers.map(x => req.get(x)));
+            let args = endpoint.params.map(x => req.params[x])
+                .concat(endpoint.query.map(x => req.query[x]))
+                .concat(endpoint.headers.map(x => req.get(x)));
 
             let body = unwrapBody(req.body);
-
             if(body) {
                 args.push(body);
             }
 
-            let handler = target[endpoint.handler];
-
             let result;
 
             try {
+                let handler = target[endpoint.handler];
                 result = handler.apply(target, args);
             } catch(error) {
-                let wrappedError = wrapErrorBody(error); //TODO: this error handler should be configurable
-                console.error('Request Error: ' + JSON.stringify(wrappedError));
-                response.status(500).send(wrappedError);
+                response.status(500).send(wrapErrorBody(error));
                 return;
             }
 
-
             if(isPromise(result)) {
-
                 let promise : Promise<any> = result;
                 promise.then(x => response.send(x))
                        .catch(error => {
-                           let wrappedError = wrapErrorBody(error); //TODO: this error handler should be configurable
-                           console.error('Request Error: ' + JSON.stringify(wrappedError));
-                           response.status(500).send(wrappedError);
+                           response.status(500).send(wrapErrorBody(error));
                        });
 
             } else if(isReadableStream(result)) {
-
                 let readableStream : Readable = result;
                 readableStream.pipe(response);
 
@@ -187,13 +174,10 @@ function isReadableStream(obj) {
         typeof (obj['_readableState'] === 'object');
 }
 
-
 function unwrapBody(body : any) : any {
     if(body === null || body === undefined) {
         return undefined;
-    }
-
-    if(Object.getOwnPropertyNames(body).length === 1 && body.hasOwnProperty('message')) {
+    } else if(Object.getOwnPropertyNames(body).length === 1 && body.hasOwnProperty('message')) {
         return body['message']
     } else {
         return body;
@@ -207,7 +191,6 @@ function wrapErrorBody(body : any) : any {
     } else {
         return {message : '' + body};
     }
-
 }
 
 function isStringifiable(obj : any) : boolean {

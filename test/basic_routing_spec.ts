@@ -9,7 +9,7 @@ describe('basic GET routing', () => {
         stopServer();
     });
 
-    it('single endpoint defined in single class',  mochaAsync(async () => {
+    it('single endpoint defined in single method',  mochaAsync(async () => {
 
         class PingService {
             @GET('/ping')
@@ -104,7 +104,22 @@ describe('basic GET routing', () => {
         expect(pong).equals('pong!');
     }));
 
-    it.skip('class-level routing should not require initial slash "/" character',  mochaAsync(async () => {
+    it('method-level routing should not require initial slash "/" character',  mochaAsync(async () => {
+
+        class PingService {
+            @GET('ping')
+            pong(): string {
+                return 'pong!';
+            }
+        }
+
+        await startServer([new PingService()]);
+
+        let pong = await doGet('/ping');
+        expect(pong).equals('pong!');
+    }));
+
+    it('class-level routing should not require initial slash "/" character',  mochaAsync(async () => {
 
         @Route('ping_service')
         class PingService {

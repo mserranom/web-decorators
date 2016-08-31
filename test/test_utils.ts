@@ -1,4 +1,4 @@
-import {configureObject} from '../src/express_decorators';
+import {configureExpressService} from '../src/express_decorators';
 
 import {Server} from 'http';
 import * as express from 'express';
@@ -13,7 +13,7 @@ const PORT = 9048;
 
 export async function startServer(configs : Array<any>) : Promise<void> {
     let app = await startExpress(PORT);
-    configs.forEach(expressConfig => configureObject(expressConfig, app));
+    configs.forEach(expressConfig => configureExpressService(expressConfig, app));
 }
 
 function startExpress(port : number) : Promise<express.Application> {
