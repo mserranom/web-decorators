@@ -4,6 +4,7 @@ import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 import {expect} from 'chai';
 
 import {Readable} from 'stream'
+import {Buffer} from 'buffer'
 
 describe('return value unwrapping', () => {
 
@@ -74,6 +75,21 @@ describe('return value unwrapping', () => {
 
         let result = await doGet('/stream_data');
         expect(result).equal('data piped correctly!');
+    }));
+
+    it('returned buffer content should be sent to response', mochaAsync(async () => {
+
+        class TestService {
+            @GET('/buffered_data')
+            getEntity() {
+               return new Buffer('buffer sent correctly!');
+            }
+        }
+
+        await startServer([new TestService()]);
+
+        let result = await doGet('/buffered_data');
+        expect(result).equal('buffer sent correctly!');
     }));
 });
 

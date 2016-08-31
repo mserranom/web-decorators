@@ -1,5 +1,4 @@
 import {GET, POST, Route} from '../src/express_decorators';
-// import {TestEndpoint, TestEntity} from './service_examples'
 import {doPost, doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';

@@ -1,5 +1,6 @@
 import {Request, Response} from 'express';
 import {Stream, Readable} from 'stream';
+import {Buffer} from 'buffer';
 
 // ------------------
 // DATA TYPES
@@ -145,6 +146,8 @@ export function configureExpressService(target : any, app) {
                 let readableStream : Readable = result;
                 readableStream.pipe(response);
 
+            } else if (Buffer.isBuffer(result)) {
+                response.send(result.toString())
             } else {
                 response.send(result);
             }
