@@ -14,16 +14,19 @@ function zeroIdCheckMiddleware(req, res, next) {
     let body = req.body;
     if (body['id'] === '0') {
         res.status(413).send('id is zero');
+    } else {
+        next();
     }
-    next();
 }
 
 function nameNullCheckMiddleware(req, res, next) {
     let body = req.body;
     if (body['name'] === null) {
         res.status(414).send('id is null');
+    } else {
+        next();
     }
-    next();
+
 }
 
 export class TestEntity {
