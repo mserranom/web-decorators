@@ -29,6 +29,7 @@ describe('error handling', () => {
 
         try {
             await doGet('/wrong');
+            expect(true).equal(false);
         } catch(error) {
             expect(error.statusCode).equal(500);
             expect(JSON.parse(error.error).message).equals('Error: error thrown');
@@ -48,6 +49,7 @@ describe('error handling', () => {
 
         try {
             await doGet('/wrong_async');
+            expect(true).equal(false);
         } catch(error) {
             expect(error.statusCode).equal(500);
             expect(JSON.parse(error.error).message).equals('Error: error thrown');
@@ -68,6 +70,7 @@ describe('error handling', () => {
 
         try {
             await doGet('/wrong_async_promise');
+            expect(true).equal(false);
         } catch(error) {
             expect(error.statusCode).equal(500);
             expect(JSON.parse(error.error).message).equals('Error: error thrown');
@@ -87,6 +90,7 @@ describe('error handling', () => {
 
         try {
             await doGet('/reject_promise');
+            expect(true).equal(false);
         } catch(error) {
             expect(error.statusCode).equal(500);
         }
