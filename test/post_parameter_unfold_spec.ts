@@ -1,5 +1,5 @@
 import {GET, POST, Route} from '../src/express_decorators';
-import {doPost, doGet, startExpressServer, stopServer, mochaAsync} from './test_utils'
+import {doPost, doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -18,7 +18,7 @@ describe('POST parameter unfolding', () => {
             @GET()  getMessage(): string { return this.message; }
         }
 
-        await startExpressServer([new TestService()]);
+        await startServer([new TestService()]);
 
         let hi = await doGet('/hi');
         expect(hi).equals('hello!');
@@ -42,7 +42,7 @@ describe('POST parameter unfolding', () => {
 
         let service = new TestService();
 
-        await startExpressServer([service]);
+        await startServer([service]);
 
         let entity = { name: 'entity', id: '101'};
         await doPost('/entity', entity);
@@ -63,7 +63,7 @@ describe('POST parameter unfolding', () => {
             }
         }
 
-        await startExpressServer([new TestService()]);
+        await startServer([new TestService()]);
 
         let fetchedData = await doGet('/header_data/myId?query=myQuery',{header1:'myHeader1',header2:'myHeader2'});
         expect(fetchedData).equals('pong');

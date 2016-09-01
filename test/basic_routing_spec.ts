@@ -1,5 +1,5 @@
 import {GET, Route} from '../src/express_decorators';
-import {doGet, startExpressServer, startRestifyServer, stopServer, mochaAsync} from './test_utils'
+import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -8,8 +8,6 @@ async function sleep(ms:number) : Promise<any> {
         setTimeout(function(){ resolve() }, ms);
     });
 }
-
-[startExpressServer/*, startRestifyServer*/].forEach((startWebServer : any) =>  {
 
 describe('basic GET routing', () => {
 
@@ -30,10 +28,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
-
-            let infra = await doGet('/infra');
-            console.log('infra: ' + infra);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
@@ -48,7 +43,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/');
             expect(pong).equals('pong!');
@@ -67,7 +62,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new TestService()]);
+            await startServer([new TestService()]);
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
@@ -92,7 +87,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService(), new HiService()]);
+            await startServer([new PingService(), new HiService()]);
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
@@ -110,7 +105,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
@@ -130,7 +125,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping_service/ping');
             expect(pong).equals('pong!');
@@ -146,7 +141,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/');
             expect(pong).equals('pong!');
@@ -162,7 +157,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/');
             expect(pong).equals('pong!');
@@ -178,7 +173,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
@@ -194,7 +189,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping');
             expect(pong).equals('pong!');
@@ -210,7 +205,7 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping_service/ping');
             expect(pong).equals('pong!');
@@ -226,14 +221,12 @@ describe('basic GET routing', () => {
                 }
             }
 
-            await startWebServer([new PingService()]);
+            await startServer([new PingService()]);
 
             let pong = await doGet('/ping_service/nested_route/service/ping/pong');
             expect(pong).equals('pong!');
         }));
     });
 });
-});
-
 
 

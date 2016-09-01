@@ -13,16 +13,13 @@ const EXPRESS_PORT = 9048;
 const RESTIFY_PORT = 9049;
 let currentPort : number;
 
-export async function startExpressServer(configs : Array<any>) : Promise<void> {
-    // startRestifyServer(configs);
+export async function startServer(configs : Array<any>) : Promise<void> {
     app = server = null;
-    await startExpress();
-    configs.forEach(expressConfig => configureExpressService(expressConfig, app));
-}
-
-export async function startRestifyServer(configs : Array<any>) : Promise<void> {
-    app = server = null;
-    await startRestify();
+    if(process.env.SERVER === 'express') {
+        await startExpress();
+    } else {
+        await startRestify();
+    }
     configs.forEach(expressConfig => configureExpressService(expressConfig, app));
 }
 
@@ -32,7 +29,7 @@ function startExpress() : Promise<void> {
     app.use(bodyParser.json());
     return new Promise<void>((resolve) => {
         server = app.listen(EXPRESS_PORT, () => {
-            app.get('/infra', (req, res) => res.send('express'));
+            app.get('/infra', (req, res) => res.send('express')); // to check which server is running at any moment
             resolve();
         });});
 }
@@ -47,6 +44,7 @@ function startRestify() : Promise<void> {
     });
 
     server.use(restify.bodyParser());
+    server.use(restify.queryParser());
 
     app = server;
 

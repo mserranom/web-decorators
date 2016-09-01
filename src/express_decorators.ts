@@ -166,9 +166,13 @@ export function configureExpressService(target : any, app) {
             const restifyResponse : any = response;
             restifyResponse['contentType'] = 'text/plain';
 
+            let isFunction = (obj) => obj && obj.constructor && obj.call && obj.apply;
+
+            let getHeader = (x) => isFunction(req.header) ? req.header(x) : req.get(x); // restify & express header
+
             let args = endpoint.params.map(x => req.params[x])
                 .concat(endpoint.query.map(x => req.query[x]))
-                .concat(endpoint.headers.map(x => req.get(x)));
+                .concat(endpoint.headers.map(x => getHeader(x)));
 
             let body = unwrapBody(req.body);
             if(body) {
@@ -184,6 +188,8 @@ export function configureExpressService(target : any, app) {
                 next(error ? error : 'unhandled exception');
                 return;
             }
+
+            result = result ? result : '';
 
             if(isPromise(result)) {
                 let promise : Promise<any> = result;

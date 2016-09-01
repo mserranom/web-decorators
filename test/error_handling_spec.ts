@@ -1,6 +1,6 @@
 import {GET, ErrorHandler} from '../src/express_decorators';
 
-import {doGet, startExpressServer, stopServer, mochaAsync} from './test_utils'
+import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -35,7 +35,7 @@ describe('error handling', () => {
                 }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong');
@@ -55,7 +55,7 @@ describe('error handling', () => {
                 }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong_async');
@@ -76,7 +76,7 @@ describe('error handling', () => {
                 }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong_async_promise');
@@ -96,7 +96,7 @@ describe('error handling', () => {
                 }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/reject_promise');
@@ -124,7 +124,7 @@ describe('error handling', () => {
                 throwError() { return fail(); }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong');
@@ -151,7 +151,7 @@ describe('error handling', () => {
 
             const DEFAULT_ERROR_CODE = 500;
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong');
@@ -175,7 +175,7 @@ describe('error handling', () => {
                 throwError() { return fail(); }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong');
@@ -205,7 +205,7 @@ describe('error handling', () => {
                 throwError() { return fail(); }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong');
@@ -232,7 +232,7 @@ describe('error handling', () => {
                 throwError() { return fail(); }
             }
 
-            await startExpressServer([new TestService()]);
+            await startServer([new TestService()]);
 
             try {
                 await doGet('/wrong');
