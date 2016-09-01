@@ -1,6 +1,6 @@
-import {GET, ErrorHandler} from '../src/express_decorators';
+import {GET, ErrorHandler} from '../../src/express_decorators';
 
-import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
+import {doGet, startServer, stopServer, mochaAsync} from '../test_utils'
 
 import {expect} from 'chai';
 

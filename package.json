@@ -31,9 +31,9 @@
     "restify": "4.1.1"
   },
   "scripts": {
-    "test": "npm run test-express",
-    "test-express" : "env SERVER=express mocha --harmony --require ts-node/register ./test/**/*.ts ",
-    "test-restify" : "env SERVER=restify mocha --harmony --require ts-node/register ./test/**/*.ts"
+    "test": "npm run test-express; npm run test-restify",
+    "test-express" : "env SERVER=express mocha --harmony --require ts-node/register ./test/*.ts ./test/express/*.ts",
+    "test-restify" : "env SERVER=restify mocha --harmony --require ts-node/register ./test/*.ts ./test/restify/*.ts"
   },
   "repository": {
     "type": "git",

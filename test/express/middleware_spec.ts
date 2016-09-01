@@ -1,5 +1,5 @@
-import {GET, POST, Middleware} from '../src/express_decorators';
-import {doPost, startServer, stopServer, mochaAsync} from './test_utils'
+import {GET, POST, Middleware} from '../../src/express_decorators';
+import {doPost, startServer, stopServer, mochaAsync} from '../test_utils'
 
 import {expect} from 'chai';
 
