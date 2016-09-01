@@ -10,6 +10,14 @@ async function sleep(ms:number) : Promise<any> {
     });
 }
 
+function throwError() {
+    throw new Error('error thrown');
+}
+
+function rejectPromise() {
+    return new Promise((resolve, reject) => {setTimeout(() => reject('error thrown'), 1)});
+}
+
 describe('error handling', () => {
 
     afterEach( () => {
@@ -100,7 +108,8 @@ describe('error handling', () => {
 
     });
 
-    describe('user defined error handlers', () => {
+    [throwError, rejectPromise].forEach((fail : any) =>  {
+        describe('user defined error handlers', () => {
 
         it('method-level handlers should handle errors',  mochaAsync(async () => {
 
@@ -112,9 +121,7 @@ describe('error handling', () => {
             class TestService {
                 @GET('/wrong')
                 @ErrorHandler(errorHandler)
-                throwError() {
-                    throw new Error('error thrown');
-                }
+                throwError() { return fail(); }
             }
 
             await startServer([new TestService()]);
@@ -124,7 +131,8 @@ describe('error handling', () => {
                 expect(true).equal(false);
             } catch(error) {
                 expect(error.statusCode).equal(599);
-                expect(error.error).equals('handled - Error: error thrown');
+                expect(error.error).contains('handled - ');
+                expect(error.error).contains(' error thrown');
             }
         }));
 
@@ -138,9 +146,7 @@ describe('error handling', () => {
             class TestService {
                 @GET('/wrong')
                 @ErrorHandler(middlewareErrorHandler)
-                throwError() {
-                    throw new Error('error thrown');
-                }
+                throwError() { return fail(); }
             }
 
             const DEFAULT_ERROR_CODE = 500;
@@ -152,7 +158,7 @@ describe('error handling', () => {
                 expect(true).equal(false);
             } catch(error) {
                 expect(error.statusCode).equal(DEFAULT_ERROR_CODE);
-                expect(JSON.parse(error.error).message).equal('Error: error thrown');
+                expect(JSON.parse(error.error).message).contains('error thrown');
             }
         }));
 
@@ -166,9 +172,7 @@ describe('error handling', () => {
             @ErrorHandler(errorHandler)
             class TestService {
                 @GET('/wrong')
-                throwError() {
-                    throw new Error('error thrown');
-                }
+                throwError() { return fail(); }
             }
 
             await startServer([new TestService()]);
@@ -178,7 +182,8 @@ describe('error handling', () => {
                 expect(true).equal(false);
             } catch(error) {
                 expect(error.statusCode).equal(599);
-                expect(error.error).equals('handled - Error: error thrown');
+                expect(error.error).contains('handled - ');
+                expect(error.error).contains(' error thrown');
             }
         }));
 
@@ -197,9 +202,7 @@ describe('error handling', () => {
             class TestService {
                 @GET('/wrong')
                 @ErrorHandler(methodLevelHandler)
-                throwError() {
-                    throw new Error();
-                }
+                throwError() { return fail(); }
             }
 
             await startServer([new TestService()]);
@@ -226,9 +229,7 @@ describe('error handling', () => {
             class TestService {
                 @GET('/wrong')
                 @ErrorHandler([handler1, handler2])
-                throwError() {
-                    throw new Error();
-                }
+                throwError() { return fail(); }
             }
 
             await startServer([new TestService()]);
@@ -242,7 +243,7 @@ describe('error handling', () => {
             }
         }));
 
-    });
+    })});
 });
 
 
