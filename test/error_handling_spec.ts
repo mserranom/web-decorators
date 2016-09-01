@@ -1,4 +1,4 @@
-import {GET} from '../src/express_decorators';
+import {GET, ErrorHandler} from '../src/express_decorators';
 
 import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
 
@@ -16,87 +16,233 @@ describe('error handling', () => {
         stopServer();
     });
 
-    it('a sync Error should should return a HTTP Code 500',  mochaAsync(async () => {
+    describe('default error handling', () => {
 
-        class TestService {
-            @GET('/wrong')
-            throwError() {
-                throw new Error('error thrown');
+        it('a sync Error should should return a HTTP Code 500',  mochaAsync(async () => {
+
+            class TestService {
+                @GET('/wrong')
+                throwError() {
+                    throw new Error('error thrown');
+                }
             }
-        }
 
-        await startServer([new TestService()]);
+            await startServer([new TestService()]);
 
-        try {
-            await doGet('/wrong');
-            expect(true).equal(false);
-        } catch(error) {
-            expect(error.statusCode).equal(500);
-            expect(JSON.parse(error.error).message).equals('Error: error thrown');
-        }
-    }));
-
-    it.skip('an unhandled async Error should return a HTTP Code 500',  mochaAsync(async () => {
-
-        class TestService {
-            @GET('/wrong_async')
-            throwAsyncError() {
-                setTimeout(() => {throw new Error('error thrown')}, 1);
+            try {
+                await doGet('/wrong');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(500);
+                expect(JSON.parse(error.error).message).equals('Error: error thrown');
             }
-        }
+        }));
 
-        await startServer([new TestService()]);
+        it.skip('an unhandled async Error should return a HTTP Code 500',  mochaAsync(async () => {
 
-        try {
-            await doGet('/wrong_async');
-            expect(true).equal(false);
-        } catch(error) {
-            expect(error.statusCode).equal(500);
-            expect(JSON.parse(error.error).message).equals('Error: error thrown');
-        }
-    }));
-
-    it('an async Error thrown while waiting for a Promise should return a HTTP Code 500',  mochaAsync(async () => {
-
-        class TestService {
-            @GET('/wrong_async_promise')
-            async throwAsyncError(): Promise<void> {
-                await sleep(1);
-                throw new Error('error thrown');
+            class TestService {
+                @GET('/wrong_async')
+                throwAsyncError() {
+                    setTimeout(() => {throw new Error('error thrown')}, 1);
+                }
             }
-        }
 
-        await startServer([new TestService()]);
+            await startServer([new TestService()]);
 
-        try {
-            await doGet('/wrong_async_promise');
-            expect(true).equal(false);
-        } catch(error) {
-            expect(error.statusCode).equal(500);
-            expect(JSON.parse(error.error).message).equals('Error: error thrown');
-        }
-    }));
-
-    it('a rejected Promise should return a HTTP Code 500',  mochaAsync(async () => {
-
-        class TestService {
-            @GET('/reject_promise')
-            rejectPromise(): Promise<void> {
-                return new Promise((resolve, reject) => {setTimeout(() => reject(), 1)});
+            try {
+                await doGet('/wrong_async');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(500);
+                expect(JSON.parse(error.error).message).equals('Error: error thrown');
             }
-        }
+        }));
 
-        await startServer([new TestService()]);
+        it('an async Error thrown while waiting for a Promise should return a HTTP Code 500',  mochaAsync(async () => {
 
-        try {
-            await doGet('/reject_promise');
-            expect(true).equal(false);
-        } catch(error) {
-            expect(error.statusCode).equal(500);
-        }
-    }));
+            class TestService {
+                @GET('/wrong_async_promise')
+                async throwAsyncError(): Promise<void> {
+                    await sleep(1);
+                    throw new Error('error thrown');
+                }
+            }
 
+            await startServer([new TestService()]);
 
+            try {
+                await doGet('/wrong_async_promise');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(500);
+                expect(JSON.parse(error.error).message).equals('Error: error thrown');
+            }
+        }));
+
+        it('a rejected Promise should return a HTTP Code 500',  mochaAsync(async () => {
+
+            class TestService {
+                @GET('/reject_promise')
+                rejectPromise(): Promise<void> {
+                    return new Promise((resolve, reject) => {setTimeout(() => reject(), 1)});
+                }
+            }
+
+            await startServer([new TestService()]);
+
+            try {
+                await doGet('/reject_promise');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(500);
+            }
+        }));
+
+    });
+
+    describe('user defined error handlers', () => {
+
+        it('method-level handlers should handle errors',  mochaAsync(async () => {
+
+            function errorHandler(err, req, res, next) {
+                res.status(599);
+                res.send('handled - ' + err);
+            }
+
+            class TestService {
+                @GET('/wrong')
+                @ErrorHandler(errorHandler)
+                throwError() {
+                    throw new Error('error thrown');
+                }
+            }
+
+            await startServer([new TestService()]);
+
+            try {
+                await doGet('/wrong');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(599);
+                expect(error.error).equals('handled - Error: error thrown');
+            }
+        }));
+
+        it('when error handler is not ended, default error handler is executed',  mochaAsync(async () => {
+
+            function middlewareErrorHandler(err, req, res, next) {
+                res.status(599);
+                next(err);
+            }
+
+            class TestService {
+                @GET('/wrong')
+                @ErrorHandler(middlewareErrorHandler)
+                throwError() {
+                    throw new Error('error thrown');
+                }
+            }
+
+            const DEFAULT_ERROR_CODE = 500;
+
+            await startServer([new TestService()]);
+
+            try {
+                await doGet('/wrong');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(DEFAULT_ERROR_CODE);
+                expect(JSON.parse(error.error).message).equal('Error: error thrown');
+            }
+        }));
+
+        it('class-level handlers should handle errors',  mochaAsync(async () => {
+
+            function errorHandler(err, req, res, next) {
+                res.status(599);
+                res.send('handled - ' + err);
+            }
+
+            @ErrorHandler(errorHandler)
+            class TestService {
+                @GET('/wrong')
+                throwError() {
+                    throw new Error('error thrown');
+                }
+            }
+
+            await startServer([new TestService()]);
+
+            try {
+                await doGet('/wrong');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.statusCode).equal(599);
+                expect(error.error).equals('handled - Error: error thrown');
+            }
+        }));
+
+        it('class-level handlers are executed before method-level handlers',  mochaAsync(async () => {
+
+            function classLevelHandle(err, req, res, next) {
+                next('class-level message - ');
+            }
+
+            function methodLevelHandler(err, req, res, next) {
+                res.status(599);
+                res.send(err + ' method-level message');
+            }
+
+            @ErrorHandler(classLevelHandle)
+            class TestService {
+                @GET('/wrong')
+                @ErrorHandler(methodLevelHandler)
+                throwError() {
+                    throw new Error();
+                }
+            }
+
+            await startServer([new TestService()]);
+
+            try {
+                await doGet('/wrong');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.error).equals('class-level message -  method-level message');
+                expect(error.statusCode).equal(599);
+            }
+        }));
+
+        it('an array of handlers should be executed in order',  mochaAsync(async () => {
+
+            function handler1(err, req, res, next) {
+                next('first handler - ');
+            }
+
+            function handler2(err, req, res, next) {
+                res.status(599).send(err + ' second handler');
+            }
+
+            class TestService {
+                @GET('/wrong')
+                @ErrorHandler([handler1, handler2])
+                throwError() {
+                    throw new Error();
+                }
+            }
+
+            await startServer([new TestService()]);
+
+            try {
+                await doGet('/wrong');
+                expect(true).equal(false);
+            } catch(error) {
+                expect(error.error).equals('first handler -  second handler');
+                expect(error.statusCode).equal(599);
+            }
+        }));
+
+    });
 });
 
 

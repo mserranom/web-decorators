@@ -19,14 +19,21 @@ interface EndpointConfig {
 interface ServiceConfig {
     endpoints : Array<EndpointConfig>;
     route : string;
-    middleware : Array<any>
-    endpointMiddleware : Map<string, Array<any>>
+    middleware : Array<any>;
+    errorHandler : Array<any>
+    endpointMiddleware : Map<string, Array<any>>;
+    endpointErrorHandler : Map<string, Array<any>>
 }
 
 function resolveServiceConfig(service : any) : ServiceConfig {
     const DECORATORS_PROP = '__web__decorators__config';
     service[DECORATORS_PROP] = service[DECORATORS_PROP]
-        || { endpoints : [], route : '', query : [] , middleware : [], endpointMiddleware : new Map(), headers : []};
+        || { endpoints : [],
+            route : '',
+            middleware : [],
+            errorHandler : [],
+            endpointMiddleware : new Map(),
+            endpointErrorHandler : new Map() };
     return service[DECORATORS_PROP];
 }
 
@@ -104,10 +111,49 @@ export function Middleware(middleware: any | Array<any>) {
     }
 }
 
+export function ErrorHandler(errorHandler: any | Array<any>) {
+
+    return function (target:any, propertyKey?:any) {
+
+        if(propertyKey) {
+            let config : ServiceConfig =  resolveServiceConfig(target);
+            config.endpointErrorHandler.set(propertyKey, [].concat(errorHandler))
+        } else {
+            let config : ServiceConfig =  resolveServiceConfig(target.prototype);
+            config.errorHandler = [].concat(errorHandler);
+        }
+    }
+}
+
 
 // ------------------
 // RUNTIME
 // ------------------
+
+function errorHandler(error, request, response, next) {
+    //TODO: investigate, could we rely on the default error handler instead?
+    response.status(500).send(wrapErrorBody(error));
+}
+
+function wrapErrorBody(body : any) : any {
+    body = body ? body : '';
+
+    //TODO: [Object object] might not be the best way to check this when the method is overriden
+    if(body.toString() == '[object Object]' && isStringifiable(body)) {
+        return body;
+    } else {
+        return {message : '' + body};
+    }
+}
+
+function isStringifiable(obj : any) : boolean {
+    try {
+        JSON.stringify(obj);
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
 
 export function configureExpressService(target : any, app) {
 
@@ -115,7 +161,7 @@ export function configureExpressService(target : any, app) {
 
     let configureEndpoint = (endpoint : EndpointConfig) => {
 
-        let requestHandler = (req : Request, response : Response) => {
+        let requestHandler = (req : Request, response : Response, next : any) => {
             let args = endpoint.params.map(x => req.params[x])
                 .concat(endpoint.query.map(x => req.query[x]))
                 .concat(endpoint.headers.map(x => req.get(x)));
@@ -131,7 +177,7 @@ export function configureExpressService(target : any, app) {
                 let handler = target[endpoint.handler];
                 result = handler.apply(target, args);
             } catch(error) {
-                response.status(500).send(wrapErrorBody(error));
+                next(error ? error : 'unhandled exception');
                 return;
             }
 
@@ -139,7 +185,7 @@ export function configureExpressService(target : any, app) {
                 let promise : Promise<any> = result;
                 promise.then(x => response.send(x))
                        .catch(error => {
-                           response.status(500).send(wrapErrorBody(error));
+                           next(error ? error : 'promise rejected')
                        });
 
             } else if(isReadableStream(result)) {
@@ -155,11 +201,20 @@ export function configureExpressService(target : any, app) {
 
         let args : Array<any> = [serviceConfig.route + endpoint.route].concat(serviceConfig.middleware);
 
+
         if(serviceConfig.endpointMiddleware.has(endpoint.handler)) {
             args = args.concat(serviceConfig.endpointMiddleware.get(endpoint.handler));
         }
 
         args.push(requestHandler);
+
+        args = args.concat(serviceConfig.errorHandler);
+
+        if(serviceConfig.endpointErrorHandler.has(endpoint.handler)) {
+            args = args.concat(serviceConfig.endpointErrorHandler.get(endpoint.handler));
+        }
+
+        args.push(errorHandler);
 
         app[endpoint.method].apply(app, args);
     };
@@ -191,25 +246,7 @@ function unwrapBody(body : any) : any {
     }
 }
 
-function wrapErrorBody(body : any) : any {
-    body = body ? body : '';
 
-    //TODO: [Object object] might not be the best way to check this when the method is overriden
-    if(body.toString() == '[object Object]' && isStringifiable(body)) {
-        return body;
-    } else {
-        return {message : '' + body};
-    }
-}
-
-function isStringifiable(obj : any) : boolean {
-    try {
-        JSON.stringify(obj);
-        return true;
-    } catch (error) {
-        return false;
-    }
-}
 
 
 
