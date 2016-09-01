@@ -83,7 +83,10 @@ describe('middleware', () => {
             await doPost('/entities', newEntity);
         } catch(error) {
             expect(error.statusCode).equal(413);
+            return;
         }
+
+        expect(true).equals(false);
     }));
 
     it('class-level defined middleware can fail request',  mochaAsync(async () => {
@@ -95,7 +98,10 @@ describe('middleware', () => {
             await doPost('/entities', newEntity);
         } catch(error) {
             expect(error.statusCode).equal(414);
+            return;
         }
+
+        expect(true).equals(false);
     }));
 
     it('class-level middleware is executed before method-level middleware',  mochaAsync(async () => {
@@ -108,7 +114,10 @@ describe('middleware', () => {
             await doPost('/entities', newEntity);
         } catch(error) {
             expect(error.statusCode).equal(414);
+            return;
         }
+
+        expect(true).equals(false);
     }));
 
 });
