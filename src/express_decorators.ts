@@ -162,6 +162,10 @@ export function configureExpressService(target : any, app) {
     let configureEndpoint = (endpoint : EndpointConfig) => {
 
         let requestHandler = (req : Request, response : Response, next : any) => {
+
+            const restifyResponse : any = response;
+            restifyResponse['contentType'] = 'text/plain';
+
             let args = endpoint.params.map(x => req.params[x])
                 .concat(endpoint.query.map(x => req.query[x]))
                 .concat(endpoint.headers.map(x => req.get(x)));

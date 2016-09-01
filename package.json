@@ -13,7 +13,8 @@
   },
   "peerDependencies": {
     "body-parser": "^1.15.2",
-    "express": "^4.14.0"
+    "express": "^4.14.0",
+    "restify": "^4.1.1"
   },
   "devDependencies": {
     "@types/mocha": "2.2.28",
@@ -26,7 +27,8 @@
     "ts-node": "1.2.2",
     "typescript": "rc",
     "body-parser": "1.15.2",
-    "express": "4.14.0"
+    "express": "4.14.0",
+    "restify": "4.1.1"
   },
   "scripts": {
     "test": "mocha --harmony --require ts-node/register ./test/**/*.ts"

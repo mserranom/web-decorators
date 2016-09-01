@@ -1,6 +1,6 @@
 import {GET} from '../src/express_decorators';
 
-import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
+import {doGet, startExpressServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -19,7 +19,10 @@ describe('GET parameter unfolding', () => {
             }
         }
 
-        await startServer([new HelloService()]);
+        await startExpressServer([new HelloService()]);
+
+        let infra = await doGet('/infra');
+        console.log('infra: ' + infra);
 
         let pong = await doGet('/hello/joe');
         expect(pong).equals('hello joe!');
@@ -34,7 +37,10 @@ describe('GET parameter unfolding', () => {
             }
         }
 
-        await startServer([new HelloService()]);
+        await startExpressServer([new HelloService()]);
+
+        let infra = await doGet('/infra');
+        console.log('infra: ' + infra);
 
         let pong = await doGet('/hello/joe/cheers');
         expect(pong).equals('hello joe, cheers!');
@@ -49,7 +55,10 @@ describe('GET parameter unfolding', () => {
             }
         }
 
-        await startServer([new HelloService()]);
+        await startExpressServer([new HelloService()]);
+
+        let infra = await doGet('/infra');
+        console.log('infra: ' + infra);
 
         let pong = await doGet('/hello?name=joe&message=cheers');
         expect(pong).equals('hello joe, cheers!');
@@ -64,7 +73,7 @@ describe('GET parameter unfolding', () => {
             }
         }
 
-        await startServer([new HelloService()]);
+        await startExpressServer([new HelloService()]);
 
         let pong = await doGet('/hello/joe?message=cheers');
         expect(pong).equals('hello joe, cheers!');
@@ -80,7 +89,7 @@ describe('GET parameter unfolding', () => {
             }
         }
 
-        await startServer([new HelloService()]);
+        await startExpressServer([new HelloService()]);
 
         let pong = await doGet('/hello/joe/friend/michael?message1=cheers&message2=good_luck');
         expect(pong).equals('hello michael, friend of joe, cheers and good_luck!');
@@ -95,7 +104,7 @@ describe('GET parameter unfolding', () => {
             }
         }
 
-        await startServer([new RangeService()]);
+        await startExpressServer([new RangeService()]);
 
         let fetchedData = await doGet('/range?unused=foo&from=2&foo=0&to=5');
         expect(JSON.parse(fetchedData)).deep.equal([5,6,7]);

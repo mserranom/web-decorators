@@ -1,5 +1,5 @@
 import {GET, POST, Middleware} from '../src/express_decorators';
-import {doPost, startServer, stopServer, mochaAsync} from './test_utils'
+import {doPost, startExpressServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -67,7 +67,7 @@ export class TestService {
 describe('middleware', () => {
 
     beforeEach(mochaAsync(async () => {
-        await startServer([new TestService()]);
+        await startExpressServer([new TestService()]);
     }));
 
     afterEach(() => {

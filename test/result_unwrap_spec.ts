@@ -1,5 +1,5 @@
 import {GET,} from '../src/express_decorators';
-import {doGet, startServer, stopServer, mochaAsync} from './test_utils'
+import {doGet, startExpressServer, stopServer, mochaAsync} from './test_utils'
 
 import {expect} from 'chai';
 
@@ -21,7 +21,7 @@ describe('return value unwrapping', () => {
             }
         }
 
-        await startServer([new TestService()]);
+        await startExpressServer([new TestService()]);
 
         let result = await doGet('/undefined');
         expect(result).equal('');
@@ -36,7 +36,7 @@ describe('return value unwrapping', () => {
             }
         }
 
-        await startServer([new TestService()]);
+        await startExpressServer([new TestService()]);
 
         let result = await doGet('/null');
         expect(result).equal('');
@@ -51,7 +51,7 @@ describe('return value unwrapping', () => {
             }
         }
 
-        await startServer([new TestService()]);
+        await startExpressServer([new TestService()]);
 
         let fetchedEntity = await doGet('/entity');
         expect(JSON.parse(fetchedEntity)).deep.equal({id : '101', name: 'entity'});
@@ -71,7 +71,7 @@ describe('return value unwrapping', () => {
             }
         }
 
-        await startServer([new TestService()]);
+        await startExpressServer([new TestService()]);
 
         let result = await doGet('/stream_data');
         expect(result).equal('data piped correctly!');
@@ -86,7 +86,7 @@ describe('return value unwrapping', () => {
             }
         }
 
-        await startServer([new TestService()]);
+        await startExpressServer([new TestService()]);
 
         let result = await doGet('/buffered_data');
         expect(result).equal('buffer sent correctly!');
