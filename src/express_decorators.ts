@@ -175,9 +175,7 @@ export function configureExpressService(target : any, app) {
                 .concat(endpoint.headers.map(x => getHeader(x)));
 
             let body = unwrapBody(req.body);
-            if(body) {
-                args.push(body);
-            }
+            body && args.push(body);
 
             let result;
 
